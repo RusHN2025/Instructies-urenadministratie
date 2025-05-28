@@ -1475,21 +1475,49 @@
             displayQuestion();
         }
 
-        // Search functionality
+        // AI-Enhanced Search functionality
         let searchTimeout;
         const searchBox = document.getElementById('searchBox');
         const searchResults = document.getElementById('searchResults');
 
+        // Synoniemen database voor intelligente zoeken
+        const synonyms = {
+            'uren': ['tijd', 'werktijd', 'timesheet', 'hours', 'werkuren'],
+            'declaraties': ['declaratie', 'kosten', 'uitgaven', 'rekeningen', 'facturen'],
+            'excel': ['spreadsheet', 'bestand', 'document', 'xlsx', 'csv'],
+            'stap': ['fase', 'onderdeel', 'actie', 'procedure', 'instructie'],
+            'evean': ['systeem', 'platform', 'applicatie', 'software'],
+            'dagelijks': ['daily', 'dag', 'routine', 'schema'],
+            'openen': ['open', 'start', 'begin', 'launch'],
+            'klikken': ['klik', 'click', 'selecteren', 'kiezen'],
+            'invullen': ['invoeren', 'typen', 'schrijven', 'completeren'],
+            'opslaan': ['bewaren', 'save', 'vastleggen', 'bevestigen'],
+            'controleren': ['checken', 'nakijken', 'verifiëren', 'bekijken']
+        };
+
+        // Populaire zoektermen voor suggesties
+        const popularTerms = [
+            'declaraties indienen',
+            'Excel openen',
+            'Evean inloggen',
+            'stap voor stap',
+            'uren invoeren',
+            'dagelijks schema',
+            'kosten declareren'
+        ];
+
         searchBox.addEventListener('input', function() {
             clearTimeout(searchTimeout);
             searchTimeout = setTimeout(() => {
-                performSearch(this.value.trim());
-            }, 300);
+                performEnhancedSearch(this.value.trim());
+            }, 200);
         });
 
         searchBox.addEventListener('focus', function() {
             if (this.value.trim()) {
                 searchResults.style.display = 'block';
+            } else {
+                showSuggestions();
             }
         });
 
@@ -1499,9 +1527,77 @@
             }
         });
 
-        function performSearch(query) {
-            if (!query || query.length < 2) {
-                searchResults.style.display = 'none';
+        // Levenshtein distance voor fuzzy matching
+        function levenshteinDistance(str1, str2) {
+            const matrix = [];
+            for (let i = 0; i <= str2.length; i++) {
+                matrix[i] = [i];
+            }
+            for (let j = 0; j <= str1.length; j++) {
+                matrix[0][j] = j;
+            }
+            for (let i = 1; i <= str2.length; i++) {
+                for (let j = 1; j <= str1.length; j++) {
+                    if (str2.charAt(i - 1) === str1.charAt(j - 1)) {
+                        matrix[i][j] = matrix[i - 1][j - 1];
+                    } else {
+                        matrix[i][j] = Math.min(
+                            matrix[i - 1][j - 1] + 1,
+                            matrix[i][j - 1] + 1,
+                            matrix[i - 1][j] + 1
+                        );
+                    }
+                }
+            }
+            return matrix[str2.length][str1.length];
+        }
+
+        // Fuzzy match functie
+        function fuzzyMatch(query, text, threshold = 2) {
+            query = query.toLowerCase();
+            text = text.toLowerCase();
+            
+            // Exacte match
+            if (text.includes(query)) return { match: true, score: 100 };
+            
+            // Woord-voor-woord fuzzy matching
+            const queryWords = query.split(' ');
+            const textWords = text.split(' ');
+            
+            let totalScore = 0;
+            let matchedWords = 0;
+            
+            queryWords.forEach(queryWord => {
+                let bestScore = 0;
+                textWords.forEach(textWord => {
+                    if (textWord.includes(queryWord)) {
+                        bestScore = Math.max(bestScore, 90);
+                    } else {
+                        const distance = levenshteinDistance(queryWord, textWord);
+                        if (distance <= threshold && queryWord.length > 2) {
+                            const score = Math.max(0, 80 - (distance * 20));
+                            bestScore = Math.max(bestScore, score);
+                        }
+                    }
+                });
+                if (bestScore > 0) {
+                    totalScore += bestScore;
+                    matchedWords++;
+                }
+            });
+            
+            const finalScore = matchedWords > 0 ? totalScore / queryWords.length : 0;
+            return { match: finalScore > 30, score: finalScore };
+        }
+
+        // Uitgebreide zoekfunctie met AI-features
+        function performEnhancedSearch(query) {
+            if (!query || query.length < 1) {
+                if (query.length === 0) {
+                    showSuggestions();
+                } else {
+                    searchResults.style.display = 'none';
+                }
                 clearHighlights();
                 return;
             }
@@ -1509,89 +1605,230 @@
             const results = [];
             const sections = document.querySelectorAll('.section');
             
+            // Genereer zoektermen inclusief synoniemen
+            const searchTerms = generateSearchTerms(query);
+            
             sections.forEach(section => {
                 const sectionId = section.id;
                 const sectionTitle = section.querySelector('h2')?.textContent || '';
                 
-                // Search in steps
+                // Search in steps met fuzzy matching
                 const steps = section.querySelectorAll('.step');
                 steps.forEach((step, index) => {
-                    const stepText = step.textContent.toLowerCase();
+                    const stepText = step.textContent;
                     const stepNumber = step.querySelector('.step-number')?.textContent || (index + 1);
                     
-                    if (stepText.includes(query.toLowerCase())) {
-                        results.push({
-                            type: 'step',
-                            sectionId: sectionId,
-                            sectionTitle: sectionTitle,
-                            stepNumber: stepNumber,
-                            content: step.textContent.trim(),
-                            element: step
-                        });
-                    }
+                    searchTerms.forEach(term => {
+                        const fuzzyResult = fuzzyMatch(term, stepText);
+                        if (fuzzyResult.match) {
+                            results.push({
+                                type: 'step',
+                                sectionId: sectionId,
+                                sectionTitle: sectionTitle,
+                                stepNumber: stepNumber,
+                                content: stepText.trim(),
+                                element: step,
+                                score: fuzzyResult.score,
+                                matchedTerm: term
+                            });
+                        }
+                    });
                 });
 
                 // Search in collapsible headers
                 const collapsibles = section.querySelectorAll('.collapsible');
                 collapsibles.forEach(collapsible => {
-                    const headerText = collapsible.textContent.toLowerCase();
-                    if (headerText.includes(query.toLowerCase())) {
-                        results.push({
-                            type: 'header',
-                            sectionId: sectionId,
-                            sectionTitle: sectionTitle,
-                            content: collapsible.textContent.trim(),
-                            element: collapsible
-                        });
-                    }
+                    const headerText = collapsible.textContent;
+                    searchTerms.forEach(term => {
+                        const fuzzyResult = fuzzyMatch(term, headerText);
+                        if (fuzzyResult.match) {
+                            results.push({
+                                type: 'header',
+                                sectionId: sectionId,
+                                sectionTitle: sectionTitle,
+                                content: headerText.trim(),
+                                element: collapsible,
+                                score: fuzzyResult.score + 10, // Headers krijgen bonus
+                                matchedTerm: term
+                            });
+                        }
+                    });
                 });
 
                 // Search in tips and warnings
                 const tips = section.querySelectorAll('.tip, .warning');
                 tips.forEach(tip => {
-                    const tipText = tip.textContent.toLowerCase();
-                    if (tipText.includes(query.toLowerCase())) {
-                        results.push({
-                            type: 'tip',
-                            sectionId: sectionId,
-                            sectionTitle: sectionTitle,
-                            content: tip.textContent.trim(),
-                            element: tip
-                        });
-                    }
+                    const tipText = tip.textContent;
+                    searchTerms.forEach(term => {
+                        const fuzzyResult = fuzzyMatch(term, tipText);
+                        if (fuzzyResult.match) {
+                            results.push({
+                                type: 'tip',
+                                sectionId: sectionId,
+                                sectionTitle: sectionTitle,
+                                content: tipText.trim(),
+                                element: tip,
+                                score: fuzzyResult.score,
+                                matchedTerm: term
+                            });
+                        }
+                    });
                 });
             });
 
-            displaySearchResults(results, query);
+            // Verwijder duplicaten en sorteer op score
+            const uniqueResults = removeDuplicates(results);
+            const sortedResults = uniqueResults.sort((a, b) => b.score - a.score);
+            
+            displaySearchResults(sortedResults, query);
+        }
+
+        // Genereer zoektermen inclusief synoniemen
+        function generateSearchTerms(query) {
+            const terms = [query];
+            const queryWords = query.toLowerCase().split(' ');
+            
+            queryWords.forEach(word => {
+                // Voeg synoniemen toe
+                Object.keys(synonyms).forEach(key => {
+                    if (key === word || synonyms[key].includes(word)) {
+                        terms.push(key);
+                        terms.push(...synonyms[key]);
+                    }
+                });
+                
+                // Voeg woordstammen toe (simpele Nederlandse stemming)
+                const stem = getStem(word);
+                if (stem !== word) {
+                    terms.push(stem);
+                }
+            });
+            
+            return [...new Set(terms)]; // Verwijder duplicaten
+        }
+
+        // Simpele Nederlandse stemming
+        function getStem(word) {
+            if (word.length < 4) return word;
+            
+            // Verwijder veelvoorkomende Nederlandse uitgangen
+            const suffixes = ['en', 'er', 'ing', 'ies', 'atie', 'eren', 'elijk'];
+            
+            for (let suffix of suffixes) {
+                if (word.endsWith(suffix) && word.length > suffix.length + 2) {
+                    return word.slice(0, -suffix.length);
+                }
+            }
+            
+            return word;
+        }
+
+        // Verwijder duplicaten op basis van content
+        function removeDuplicates(results) {
+            const seen = new Set();
+            return results.filter(result => {
+                const key = `${result.sectionId}-${result.type}-${result.content.substring(0, 50)}`;
+                if (seen.has(key)) {
+                    return false;
+                }
+                seen.add(key);
+                return true;
+            });
+        }
+
+        // Toon suggesties wanneer zoekbalk leeg is
+        function showSuggestions() {
+            let html = '<div class="search-result-title" style="padding: 12px 20px; color: #6b7280;">💡 Populaire zoekopdrachten:</div>';
+            
+            popularTerms.forEach(term => {
+                html += `
+                    <div class="search-result-item" onclick="searchSuggestion('${term}')">
+                        <div class="search-result-content">🔍 ${term}</div>
+                    </div>
+                `;
+            });
+            
+            searchResults.innerHTML = html;
+            searchResults.style.display = 'block';
+        }
+
+        // Klik op suggestie
+        function searchSuggestion(term) {
+            searchBox.value = term;
+            performEnhancedSearch(term);
         }
 
         function displaySearchResults(results, query) {
             if (results.length === 0) {
-                searchResults.innerHTML = '<div class="no-results">Geen resultaten gevonden voor "' + query + '"</div>';
+                // Toon slimme suggesties bij geen resultaten
+                const suggestions = getSmartSuggestions(query);
+                let html = '<div class="no-results">Geen exacte resultaten gevonden voor "' + query + '"</div>';
+                
+                if (suggestions.length > 0) {
+                    html += '<div class="search-result-title" style="padding: 12px 20px; color: #6b7280;">🤔 Bedoelde je misschien:</div>';
+                    suggestions.forEach(suggestion => {
+                        html += `
+                            <div class="search-result-item" onclick="searchSuggestion('${suggestion}')">
+                                <div class="search-result-content">💭 ${suggestion}</div>
+                            </div>
+                        `;
+                    });
+                }
+                
+                searchResults.innerHTML = html;
                 searchResults.style.display = 'block';
                 return;
             }
 
             let html = '';
-            results.slice(0, 10).forEach(result => {
-                const highlightedContent = highlightText(result.content, query);
+            results.slice(0, 12).forEach((result, index) => {
+                const highlightedContent = highlightText(result.content, result.matchedTerm || query);
                 const typeIcon = result.type === 'step' ? '📋' : result.type === 'header' ? '📁' : '💡';
                 const stepInfo = result.stepNumber ? ` - Stap ${result.stepNumber}` : '';
+                const scoreIndicator = result.score > 90 ? '🎯' : result.score > 70 ? '✨' : '🔍';
                 
                 html += `
-                    <div class="search-result-item" onclick="goToResult('${result.sectionId}', ${results.indexOf(result)})">
-                        <div class="search-result-title">${typeIcon} ${result.sectionTitle}${stepInfo}</div>
+                    <div class="search-result-item" onclick="goToResult('${result.sectionId}', ${index})">
+                        <div class="search-result-title">${scoreIndicator} ${typeIcon} ${result.sectionTitle}${stepInfo}</div>
                         <div class="search-result-content">${highlightedContent}</div>
                     </div>
                 `;
             });
 
-            if (results.length > 10) {
-                html += `<div class="no-results">... en ${results.length - 10} meer resultaten</div>`;
+            if (results.length > 12) {
+                html += `<div class="no-results">... en ${results.length - 12} meer resultaten</div>`;
             }
 
             searchResults.innerHTML = html;
             searchResults.style.display = 'block';
+        }
+
+        // Genereer slimme suggesties bij geen resultaten
+        function getSmartSuggestions(query) {
+            const suggestions = [];
+            const queryLower = query.toLowerCase();
+            
+            // Zoek naar gelijkaardige termen in synoniemen
+            Object.keys(synonyms).forEach(key => {
+                if (levenshteinDistance(queryLower, key) <= 2) {
+                    suggestions.push(key);
+                }
+                synonyms[key].forEach(synonym => {
+                    if (levenshteinDistance(queryLower, synonym) <= 2) {
+                        suggestions.push(key);
+                    }
+                });
+            });
+            
+            // Voeg populaire termen toe die gelijken op de query
+            popularTerms.forEach(term => {
+                if (term.toLowerCase().includes(queryLower) || 
+                    queryLower.split(' ').some(word => term.toLowerCase().includes(word))) {
+                    suggestions.push(term);
+                }
+            });
+            
+            return [...new Set(suggestions)].slice(0, 5);
         }
 
         function highlightText(text, query) {
