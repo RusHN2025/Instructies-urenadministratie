@@ -65,6 +65,85 @@
             z-index: 100;
         }
 
+        .search-container {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .search-box {
+            width: 100%;
+            max-width: 400px;
+            padding: 12px 20px;
+            border: 2px solid #e5e7eb;
+            border-radius: 25px;
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.3s ease;
+            background: #f8fafc;
+        }
+
+        .search-box:focus {
+            border-color: var(--primary-color);
+            background: white;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .search-box::placeholder {
+            color: #9ca3af;
+        }
+
+        .search-results {
+            margin-top: 15px;
+            text-align: left;
+            max-height: 300px;
+            overflow-y: auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            display: none;
+        }
+
+        .search-result-item {
+            padding: 12px 20px;
+            border-bottom: 1px solid #e5e7eb;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        .search-result-item:hover {
+            background: var(--light-gray);
+        }
+
+        .search-result-item:last-child {
+            border-bottom: none;
+        }
+
+        .search-result-title {
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-bottom: 4px;
+        }
+
+        .search-result-content {
+            font-size: 0.9rem;
+            color: var(--dark-gray);
+            line-height: 1.4;
+        }
+
+        .highlight {
+            background: #fef3c7;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-weight: 600;
+        }
+
+        .no-results {
+            padding: 20px;
+            text-align: center;
+            color: #6b7280;
+            font-style: italic;
+        }
+
         nav ul {
             list-style: none;
             display: flex;
@@ -622,6 +701,10 @@
 
     <div class="container">
         <nav>
+            <div class="search-container">
+                <input type="text" class="search-box" id="searchBox" placeholder="🔍 Zoek in instructies... (bijv. 'declaraties', 'Excel', 'stap 5')">
+                <div class="search-results" id="searchResults"></div>
+            </div>
             <ul>
                 <li><button onclick="showSection('intro')" class="nav-btn active">Introductie</button></li>
                 <li><button onclick="showSection('declaraties')" class="nav-btn">Declaraties</button></li>
@@ -1391,6 +1474,204 @@
             document.getElementById('quiz-results').style.display = 'none';
             displayQuestion();
         }
+
+        // Search functionality
+        let searchTimeout;
+        const searchBox = document.getElementById('searchBox');
+        const searchResults = document.getElementById('searchResults');
+
+        searchBox.addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                performSearch(this.value.trim());
+            }, 300);
+        });
+
+        searchBox.addEventListener('focus', function() {
+            if (this.value.trim()) {
+                searchResults.style.display = 'block';
+            }
+        });
+
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.search-container')) {
+                searchResults.style.display = 'none';
+            }
+        });
+
+        function performSearch(query) {
+            if (!query || query.length < 2) {
+                searchResults.style.display = 'none';
+                clearHighlights();
+                return;
+            }
+
+            const results = [];
+            const sections = document.querySelectorAll('.section');
+            
+            sections.forEach(section => {
+                const sectionId = section.id;
+                const sectionTitle = section.querySelector('h2')?.textContent || '';
+                
+                // Search in steps
+                const steps = section.querySelectorAll('.step');
+                steps.forEach((step, index) => {
+                    const stepText = step.textContent.toLowerCase();
+                    const stepNumber = step.querySelector('.step-number')?.textContent || (index + 1);
+                    
+                    if (stepText.includes(query.toLowerCase())) {
+                        results.push({
+                            type: 'step',
+                            sectionId: sectionId,
+                            sectionTitle: sectionTitle,
+                            stepNumber: stepNumber,
+                            content: step.textContent.trim(),
+                            element: step
+                        });
+                    }
+                });
+
+                // Search in collapsible headers
+                const collapsibles = section.querySelectorAll('.collapsible');
+                collapsibles.forEach(collapsible => {
+                    const headerText = collapsible.textContent.toLowerCase();
+                    if (headerText.includes(query.toLowerCase())) {
+                        results.push({
+                            type: 'header',
+                            sectionId: sectionId,
+                            sectionTitle: sectionTitle,
+                            content: collapsible.textContent.trim(),
+                            element: collapsible
+                        });
+                    }
+                });
+
+                // Search in tips and warnings
+                const tips = section.querySelectorAll('.tip, .warning');
+                tips.forEach(tip => {
+                    const tipText = tip.textContent.toLowerCase();
+                    if (tipText.includes(query.toLowerCase())) {
+                        results.push({
+                            type: 'tip',
+                            sectionId: sectionId,
+                            sectionTitle: sectionTitle,
+                            content: tip.textContent.trim(),
+                            element: tip
+                        });
+                    }
+                });
+            });
+
+            displaySearchResults(results, query);
+        }
+
+        function displaySearchResults(results, query) {
+            if (results.length === 0) {
+                searchResults.innerHTML = '<div class="no-results">Geen resultaten gevonden voor "' + query + '"</div>';
+                searchResults.style.display = 'block';
+                return;
+            }
+
+            let html = '';
+            results.slice(0, 10).forEach(result => {
+                const highlightedContent = highlightText(result.content, query);
+                const typeIcon = result.type === 'step' ? '📋' : result.type === 'header' ? '📁' : '💡';
+                const stepInfo = result.stepNumber ? ` - Stap ${result.stepNumber}` : '';
+                
+                html += `
+                    <div class="search-result-item" onclick="goToResult('${result.sectionId}', ${results.indexOf(result)})">
+                        <div class="search-result-title">${typeIcon} ${result.sectionTitle}${stepInfo}</div>
+                        <div class="search-result-content">${highlightedContent}</div>
+                    </div>
+                `;
+            });
+
+            if (results.length > 10) {
+                html += `<div class="no-results">... en ${results.length - 10} meer resultaten</div>`;
+            }
+
+            searchResults.innerHTML = html;
+            searchResults.style.display = 'block';
+        }
+
+        function highlightText(text, query) {
+            if (!query) return text;
+            
+            const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+            return text.replace(regex, '<span class="highlight">$1</span>');
+        }
+
+        function goToResult(sectionId, resultIndex) {
+            // Hide search results
+            searchResults.style.display = 'none';
+            
+            // Show the correct section
+            showSection(sectionId);
+            
+            // Scroll to the element after a short delay
+            setTimeout(() => {
+                const query = searchBox.value.trim();
+                highlightInPage(query);
+                
+                // Find and scroll to the first highlighted element
+                const firstHighlight = document.querySelector('.highlight');
+                if (firstHighlight) {
+                    firstHighlight.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }, 300);
+        }
+
+        function highlightInPage(query) {
+            clearHighlights();
+            
+            if (!query || query.length < 2) return;
+            
+            const activeSection = document.querySelector('.section.active');
+            if (!activeSection) return;
+            
+            const walker = document.createTreeWalker(
+                activeSection,
+                NodeFilter.SHOW_TEXT,
+                null,
+                false
+            );
+            
+            const textNodes = [];
+            let node;
+            while (node = walker.nextNode()) {
+                if (node.nodeValue.trim() && !node.parentElement.classList.contains('highlight')) {
+                    textNodes.push(node);
+                }
+            }
+            
+            const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+            
+            textNodes.forEach(textNode => {
+                const text = textNode.nodeValue;
+                if (regex.test(text)) {
+                    const highlightedHTML = text.replace(regex, '<span class="highlight">$1</span>');
+                    const wrapper = document.createElement('span');
+                    wrapper.innerHTML = highlightedHTML;
+                    textNode.parentNode.replaceChild(wrapper, textNode);
+                }
+            });
+        }
+
+        function clearHighlights() {
+            const highlights = document.querySelectorAll('.highlight');
+            highlights.forEach(highlight => {
+                const parent = highlight.parentNode;
+                parent.replaceChild(document.createTextNode(highlight.textContent), highlight);
+                parent.normalize();
+            });
+        }
+
+        // Clear highlights when switching sections
+        const originalShowSection = showSection;
+        showSection = function(sectionName) {
+            clearHighlights();
+            originalShowSection(sectionName);
+        };
     </script>
 </body>
 </html>
