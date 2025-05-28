@@ -1,0 +1,1396 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HappyOne Werkinstructies & Quiz</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #3b82f6;
+            --success-color: #10b981;
+            --danger-color: #ef4444;
+            --warning-color: #f59e0b;
+            --dark-gray: #1f2937;
+            --light-gray: #f3f4f6;
+            --white: #ffffff;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: var(--dark-gray);
+            background-color: var(--light-gray);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 40px 0;
+            text-align: center;
+            box-shadow: var(--shadow);
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        nav {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 20px;
+            z-index: 100;
+        }
+
+        nav ul {
+            list-style: none;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+        }
+
+        nav button {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        nav button:hover {
+            background: var(--secondary-color);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+
+        nav button.active {
+            background: var(--success-color);
+        }
+
+        .section {
+            background: white;
+            padding: 30px;
+            margin: 20px 0;
+            border-radius: 10px;
+            box-shadow: var(--shadow);
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .section h2 {
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            font-size: 2rem;
+            border-bottom: 3px solid var(--primary-color);
+            padding-bottom: 10px;
+        }
+
+        .section h3 {
+            color: var(--dark-gray);
+            margin: 20px 0 15px 0;
+            font-size: 1.5rem;
+        }
+
+        .step {
+            background: var(--light-gray);
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 8px;
+            border-left: 4px solid var(--primary-color);
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .step:hover {
+            transform: translateX(5px);
+            box-shadow: var(--shadow);
+        }
+
+        .step-number {
+            background: var(--primary-color);
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        .screenshot-placeholder {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 8px;
+            text-align: center;
+            position: relative;
+            min-height: 150px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .screenshot-placeholder img {
+            max-width: 100%;
+            max-height: 500px;
+            height: auto;
+            border-radius: 5px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            object-fit: contain;
+        }
+
+        .screenshot-placeholder::before {
+            content: "📷";
+            font-size: 2rem;
+            opacity: 0.2;
+            position: absolute;
+            z-index: 0;
+        }
+
+        .screenshot-placeholder:has(img)::before {
+            display: none;
+        }
+
+        .screenshot-description {
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            margin-top: 10px;
+            z-index: 2;
+            opacity: 0.8;
+            font-weight: 500;
+        }
+
+        .warning, .tip {
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 8px;
+            position: relative;
+            padding-left: 50px;
+        }
+
+        .warning {
+            background: #fef3c7;
+            border-left: 4px solid var(--warning-color);
+        }
+
+        .warning::before {
+            content: "⚠️";
+            position: absolute;
+            left: 15px;
+            font-size: 1.5rem;
+        }
+
+        .tip {
+            background: #d1fae5;
+            border-left: 4px solid var(--success-color);
+        }
+
+        .tip::before {
+            content: "💡";
+            position: absolute;
+            left: 15px;
+            font-size: 1.5rem;
+        }
+
+        ul.checklist {
+            list-style: none;
+            margin: 15px 0;
+        }
+
+        ul.checklist li {
+            padding: 8px 0;
+            padding-left: 30px;
+            position: relative;
+        }
+
+        ul.checklist li::before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: var(--success-color);
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .quiz-container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin-top: 20px;
+            box-shadow: var(--shadow);
+        }
+
+        .quiz-progress {
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e5e7eb;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            border-radius: 4px;
+            transition: width 0.3s ease;
+            width: 5%;
+        }
+
+        #progress-text {
+            color: var(--dark-gray);
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .quiz-question {
+            background: var(--light-gray);
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .quiz-question h3 {
+            color: var(--primary-color);
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+
+        .quiz-question p {
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+            color: var(--dark-gray);
+        }
+
+        .quiz-options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .quiz-option {
+            background: white;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 15px 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+            position: relative;
+        }
+
+        .quiz-option:hover {
+            border-color: var(--primary-color);
+            background: #f8fafc;
+            transform: translateY(-1px);
+        }
+
+        .quiz-option.selected {
+            border-color: var(--secondary-color);
+            background: var(--secondary-color);
+            color: white;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .quiz-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 30px;
+            gap: 15px;
+        }
+
+        .quiz-controls button {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 120px;
+        }
+
+        .quiz-controls button:hover:not(:disabled) {
+            background: var(--secondary-color);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+
+        .quiz-controls button:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        #submit-btn {
+            background: var(--success-color);
+        }
+
+        #submit-btn:hover {
+            background: #059669;
+        }
+
+        #quiz-results {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            text-align: center;
+            margin-top: 20px;
+            box-shadow: var(--shadow);
+        }
+
+        #quiz-results h3 {
+            color: var(--primary-color);
+            margin-bottom: 30px;
+            font-size: 2rem;
+        }
+
+        .results-score {
+            margin-bottom: 30px;
+        }
+
+        .score-circle {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--success-color), #059669);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+        }
+
+        #score-percentage {
+            font-size: 2rem;
+            font-weight: bold;
+            color: white;
+        }
+
+        #score-text {
+            font-size: 1.2rem;
+            color: var(--dark-gray);
+            margin-bottom: 20px;
+        }
+
+        .reset-btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .reset-btn:hover {
+            background: var(--secondary-color);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+
+        #results-details {
+            background: var(--light-gray);
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            text-align: left;
+        }
+
+        .result-item {
+            padding: 10px 0;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .result-item:last-child {
+            border-bottom: none;
+        }
+
+        .result-correct {
+            color: var(--success-color);
+            font-weight: 600;
+        }
+
+        .result-incorrect {
+            color: var(--danger-color);
+            font-weight: 600;
+        }
+
+        .question {
+            background: var(--light-gray);
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .question h4 {
+            color: var(--dark-gray);
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+
+        .question label {
+            display: block;
+            padding: 15px 20px;
+            margin: 10px 0;
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .question label:hover {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+            transform: translateY(-2px);
+        }
+
+        .question input[type="radio"] {
+            display: none;
+        }
+
+        .question input[type="radio"]:checked + label {
+            background: var(--secondary-color);
+            color: white;
+            border-color: var(--secondary-color);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .quiz-submit {
+            background: var(--success-color);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: block;
+            margin: 40px auto 20px auto;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow);
+        }
+
+        .quiz-submit:hover {
+            background: #059669;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+        }
+
+        .quiz-results {
+            display: none;
+            background: var(--light-gray);
+            padding: 30px;
+            border-radius: 10px;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .quiz-results h3 {
+            color: var(--primary-color);
+            margin-bottom: 20px;
+        }
+
+        .score {
+            font-size: 3rem;
+            font-weight: bold;
+            color: var(--success-color);
+            margin: 20px 0;
+        }
+
+        .collapsible {
+            background: var(--primary-color);
+            color: white;
+            cursor: pointer;
+            padding: 15px;
+            width: 100%;
+            border: none;
+            text-align: left;
+            outline: none;
+            font-size: 1.1rem;
+            border-radius: 5px;
+            margin: 10px 0;
+            transition: all 0.3s ease;
+        }
+
+        .collapsible:after {
+            content: '\002B';
+            color: white;
+            font-weight: bold;
+            float: right;
+            margin-left: 5px;
+        }
+
+        .collapsible.active:after {
+            content: "\2212";
+        }
+
+        .collapsible-content {
+            padding: 0 18px;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+            background-color: white;
+            border-radius: 0 0 5px 5px;
+        }
+
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 2rem;
+            }
+            
+            nav ul {
+                flex-direction: column;
+            }
+            
+            nav button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>HappyOne Werkinstructies</h1>
+        <p>Professionele handleiding voor declaraties, urenverwerking en dagelijkse taken</p>
+    </header>
+
+    <div class="container">
+        <nav>
+            <ul>
+                <li><button onclick="showSection('intro')" class="nav-btn active">Introductie</button></li>
+                <li><button onclick="showSection('declaraties')" class="nav-btn">Declaraties</button></li>
+                <li><button onclick="showSection('evean')" class="nav-btn">Urenverwerking Evean</button></li>
+                <li><button onclick="showSection('dagelijks')" class="nav-btn">Dagelijks Schema</button></li>
+                <li><button onclick="showSection('quiz')" class="nav-btn">Quiz</button></li>
+            </ul>
+        </nav>
+
+        <section id="intro" class="section active">
+            <h2>Welkom bij de HappyOne Werkinstructies</h2>
+            <p>Deze interactieve handleiding helpt je stap voor stap door drie belangrijke processen:</p>
+            <ul class="checklist">
+                <li>Declaraties klaarzetten voor automatische synchronisatie</li>
+                <li>Urenverwerking voor Evean</li>
+                <li>Dagelijks tijdschema en bijbehorende mailtaken</li>
+            </ul>
+            
+            <div class="tip">
+                <strong>TIP:</strong> Gebruik de navigatie bovenaan om direct naar een specifiek onderdeel te gaan. Aan het einde vind je een quiz om je kennis te testen.
+            </div>
+
+            <h3>Wat je nodig hebt</h3>
+            <ul class="checklist">
+                <li>Inloggegevens voor HappyOne</li>
+                <li>Toegang tot de admin-mailbox</li>
+                <li>Excel of vergelijkbaar spreadsheetprogramma</li>
+                <li>Stabiele internetverbinding</li>
+            </ul>
+        </section>
+
+        <section id="declaraties" class="section">
+            <h2>1. Declaraties klaarzetten voor automatische synchronisatie</h2>
+            
+            <button class="collapsible">Stap 1: Declaratiepagina openen</button>
+            <div class="collapsible-content">
+                <div class="step">
+                    <span class="step-number">1</span>
+                    Open HappyOne en <strong>log in</strong> met je gegevens.
+                </div>
+                <div class="step">
+                    <span class="step-number">2</span>
+                    Klik op <strong>Declaraties</strong> in het hoofdmenu.
+                </div>
+                <div class="screenshot-placeholder">
+                    <div class="screenshot-description">
+                        Je ziet een wit scherm met bovenaan de titel 'Declaraties'. Eronder staat een tabel met kolomnamen zoals 'Datum', 'Medewerker', en 'Status'. Rechtsonder zie je een blauwe knop 'Actie'.
+                    </div>
+                    <img src="images/declaraties - stap 1.2.png" alt="Declaraties hoofdscherm" onerror="this.style.display='none'">
+                </div>
+            </div>
+
+            <button class="collapsible">Stap 2: Declaraties selecteren</button>
+            <div class="collapsible-content">
+                <div class="step">
+                    <span class="step-number">3</span>
+                    Zoek het veld <strong>Vestiging Klant</strong> bovenaan de tabel.
+                </div>
+                <div class="step">
+                    <span class="step-number">4</span>
+                    Klik op het pijltje en selecteer één voor één deze vestigingen:
+                    <ul class="checklist">
+                        <li>Amsterdam</li>
+                        <li>Amersfoort</li>
+                        <li>Groningen</li>
+                        <li>HappyNurse Nederland</li>
+                        <li>HappyNurse Service Center</li>
+                        <li>Leiden</li>
+                        <li>Den Bosch</li>
+                    </ul>
+                </div>
+                <div class="screenshot-placeholder">
+                    <div class="screenshot-description">
+                        Dropdown menu met alle vestigingen zichtbaar
+                    </div>
+                    <img src="images/declaraties - stap 2.4.png" alt="Vestiging selectie" onerror="this.style.display='none'">
+                </div>
+                <div class="step">
+                    <span class="step-number">5</span>
+                    Zoek het veld <strong>Status</strong>, klik op het pijltje en vink <strong>Nieuw</strong> aan.
+                </div>
+            </div>
+
+            <button class="collapsible">Stap 3: Indienen namens FW</button>
+            <div class="collapsible-content">
+                <div class="step">
+                    <span class="step-number">6</span>
+                    Vink in de tabel links alle regels aan.
+                </div>
+                <div class="step">
+                    <span class="step-number">7</span>
+                    Scroll naar onder en klik op de knop <strong>Actie</strong>.
+                </div>
+                <div class="step">
+                    <span class="step-number">8</span>
+                    Kies <strong>Indienen namens FW</strong>.
+                </div>
+                <div class="step">
+                    <span class="step-number">9</span>
+                    Klik op <strong>Door naar Klant Validatie</strong>.
+                </div>
+                <div class="screenshot-placeholder">
+                    <div class="screenshot-description">
+                        Actie menu met "Indienen namens FW" optie
+                    </div>
+                    <img src="images/declaraties - stap 3.9.gif" alt="Indienen namens FW" onerror="this.style.display='none'">
+                </div>
+            </div>
+
+            <button class="collapsible">Stap 4: Goedkeuren namens Klant</button>
+            <div class="collapsible-content">
+                <div class="step">
+                    <span class="step-number">10</span>
+                    Zet de filter <strong>Status Nieuw</strong> uit en zet de filter <strong>Klant Validatie</strong> aan.
+                </div>
+                <div class="step">
+                    <span class="step-number">11</span>
+                    Vink opnieuw alle regels aan.
+                </div>
+                <div class="step">
+                    <span class="step-number">12</span>
+                    Scroll naar onder, klik op <strong>Klant Akkoord (Goedkeuren namens Klant)</strong>.
+                </div>
+                <div class="step">
+                    <span class="step-number">13</span>
+                    Schakel <strong>Status Klant Validatie</strong> uit en selecteer <strong>Klant Akkoord</strong>.
+                </div>
+                <div class="step">
+                    <span class="step-number">14</span>
+                    Vink alle regels aan, scroll naar onder, klik op <strong>Actie</strong> en kies <strong>Goedkeuren</strong>.
+                </div>
+                <div class="warning">
+                    <strong>LET OP:</strong> Vanaf nu stop je. Verander geen statussen meer.
+                </div>
+            </div>
+
+            <button class="collapsible">Stap 5: Handmatig synchroniseren (alleen bij correcties)</button>
+            <div class="collapsible-content">
+                <div class="step">
+                    <span class="step-number">16</span>
+                    Ga naar het veld <strong>Status</strong>, klik op het pijltje en kies <strong>Overzetten naar EF</strong>.
+                </div>
+                <div class="step">
+                    <span class="step-number">17</span>
+                    Klik op <strong>Sync</strong>.
+                </div>
+                <div class="warning">
+                    <strong>BELANGRIJK:</strong> Na deze stap verander je niets meer. HappyOne synchroniseert automatisch alle declaraties met status "Overzetten naar EF".
+                </div>
+                <div class="warning">
+                    <strong>LET OP:</strong> Zet de status niet handmatig op "Synchroniseren", dit veroorzaakt dubbele declaraties.
+                </div>
+            </div>
+        </section>
+
+        <section id="evean" class="section">
+            <h2>2. Urenverwerking voor Evean</h2>
+
+            <button class="collapsible">Stap 1: Mailbox controleren</button>
+            <div class="collapsible-content">
+                <div class="step">
+                    <span class="step-number">1</span>
+                    Open je admin-mailbox.
+                </div>
+                <div class="step">
+                    <span class="step-number">2</span>
+                    Zoek mails over <strong>werk-werk kilometers</strong> en voeg deze toe in de declaraties als de medewerker dit zelf niet heeft gedaan.
+                </div>
+                <div class="step">
+                    <span class="step-number">3</span>
+                    Sleep elke mail naar de juiste weekmap.
+                </div>
+                <div class="step">
+                    <span class="step-number">4</span>
+                    Zoek mails met <strong>nieuwe diensten</strong> en stuur deze naar de juiste vestiging.
+                </div>
+            </div>
+
+            <button class="collapsible">Stap 2: Concept plaatsingen en diensten controleren</button>
+            <div class="collapsible-content">
+                <div class="step">
+                    <span class="step-number">5</span>
+                    Open HappyOne en ga naar <strong>Concept Plaatsingen</strong>.
+                </div>
+                <div class="step">
+                    <span class="step-number">6</span>
+                    Controleer of alle geplande diensten actief zijn.
+                </div>
+                <div class="tip">
+                    <strong>TIP:</strong> Als een plaatsing niet actief is, verschijnt er geen declaratie.
+                </div>
+                <div class="step">
+                    <span class="step-number">7</span>
+                    Kijk daarna bij <strong>Diensten zonder declaratie</strong> en los eventuele ontbrekende declaraties op.
+                </div>
+            </div>
+
+            <button class="collapsible">Stap 3: Uren exporteren</button>
+            <div class="collapsible-content">
+                <div class="step">
+                    <span class="step-number">8</span>
+                    Ga naar <strong>Declaraties</strong> en filter op <strong>Status Nieuw</strong>.
+                </div>
+                <div class="step">
+                    <span class="step-number">9</span>
+                    Vink alle regels aan en klik op <strong>Indienen namens FW</strong>.
+                </div>
+                <div class="step">
+                    <span class="step-number">10</span>
+                    Selecteer alles en kies <strong>Declaraties exporteren</strong>.
+                </div>
+                <div class="step">
+                    <span class="step-number">11</span>
+                    Sla het Excel-bestand op in de <a href="https://happynurseuzb.sharepoint.com/:f:/s/BackOffice/EiGiIrtP2BxPrgrGI4d2mlQByg3yvL8Bai3QpG2R7NtgoQ?e=VaHgb0" target="_blank">weekmap</a> met de naam:<br>
+                    <code>&lt;jaartal&gt;-&lt;weeknummer&gt; Evean alle uren</code><br>
+                    Bijvoorbeeld: <strong>2024-01 Evean alle uren</strong>
+                </div>
+                <div class="screenshot-placeholder">
+                    <div class="screenshot-description">
+                        Urenverwerking Evean - stap 3.11
+                    </div>
+                    <img src="images/Urenverwerking Evean - stap 3.11.gif" alt="Urenverwerking Evean stap 3.11" onerror="this.style.display='none'">
+                </div>
+            </div>
+
+            <button class="collapsible">Stap 4: Bestand bewerken</button>
+            <div class="collapsible-content">
+                <div class="step">
+                    <span class="step-number">12</span>
+                    Open het Excel-bestand.
+                </div>
+                <div class="step">
+                    <span class="step-number">13</span>
+                    Verwijder de volgende kolommen:
+                    <ul>
+                        <li>C (Medewerker Function)</li>
+                        <li>D (Medewerker Overeenkomst)</li>
+                        <li>E (Medewerker Locatie)</li>
+                        <li>S (Soort Dienst)</li>
+                        <li>T (Toelichting FW)</li>
+                    </ul>
+                </div>
+                <div class="step">
+                    <span class="step-number">14</span>
+                    Sorteer op <strong>Medewerker</strong>, <strong>Begindatum</strong>, <strong>Begintijd</strong> en zet een filter aan.
+                </div>
+                <div class="step">
+                    <span class="step-number">15</span>
+                    Verwijder regels met diensten van 1 minuut (0,02 uur).
+                </div>
+                <div class="step">
+                    <span class="step-number">16</span>
+                    Pas kolom K (Totaal) aan naar <strong>Getal</strong> met twee decimalen.
+                </div>
+            </div>
+
+            <button class="collapsible">Stap 5: Uitzendkrachten en ZZP'ers</button>
+            <div class="collapsible-content">
+                <div class="step">
+                    <span class="step-number">17</span>
+                    Filter op <strong>Uitzendkrachten (UZK)</strong> en sla op als:<br>
+                    <code>&lt;jaartal&gt;-&lt;weeknummer&gt; Evean UZK</code>
+                </div>
+                <div class="step">
+                    <span class="step-number">18</span>
+                    Filter op <strong>ZZP'ers</strong> en sla op als:<br>
+                    <code>&lt;jaartal&gt;-&lt;weeknummer&gt; Evean ZZP</code>
+                </div>
+                <div class="warning">
+                    <strong>LET OP:</strong> Selecteer alleen de regels, niet hele lege rijen.
+                </div>
+            </div>
+
+            <button class="collapsible">Stap 6: Verzenden naar Evean</button>
+            <div class="collapsible-content">
+                <div class="step">
+                    <span class="step-number">20</span>
+                    Maak één e-mail aan met de twee bestanden:
+                    <ul>
+                        <li><strong>Aan:</strong> rbreidenbach@evean.nl, nbruin@evean.nl</li>
+                        <li><strong>Onderwerp:</strong> Evean Uren &lt;jaartal&gt;-&lt;weeknummer&gt;</li>
+                        <li>Voeg beide bijlagen toe en verstuur</li>
+                    </ul>
+                </div>
+            </div>
+
+            <button class="collapsible">Stap 7: Afgekeurde diensten verwerken</button>
+            <div class="collapsible-content">
+                <div class="step">
+                    <span class="step-number">21</span>
+                    Wacht op de bestanden die Ron of Nico terugstuurt (met twee extra kolommen).
+                </div>
+                <div class="step">
+                    <span class="step-number">22</span>
+                    Filter in de bestanden op <strong>NIET AKKOORD</strong>.
+                </div>
+                <div class="step">
+                    <span class="step-number">23</span>
+                    Sla de afgekeurde regels op in twee nieuwe bestanden:
+                    <ul>
+                        <li>&lt;jaartal&gt;-&lt;weeknummer&gt; Evean UZK Afgekeurde diensten</li>
+                        <li>&lt;jaartal&gt;-&lt;weeknummer&gt; Evean ZZP Afgekeurde diensten</li>
+                    </ul>
+                </div>
+                <div class="step">
+                    <span class="step-number">24</span>
+                    Verwijder kolom P (Akkoord) en maak kolom <strong>ONS</strong> van kolom1.
+                </div>
+                <div class="step">
+                    <span class="step-number">25</span>
+                    Voeg kolommen <strong>Actie</strong> (datum mail) en <strong>Reactie</strong> (antwoord medewerker) toe.
+                </div>
+                <div class="tip">
+                    <strong>TIP:</strong> Kopieer afgekeurde regels naar een tijdelijk bestand voor mailverzending. Verwijder kolommen A, C, L, M, N en O. Zet alle randen zwart voor betere leesbaarheid.
+                </div>
+            </div>
+
+            <button class="collapsible">Stap 8: Slotcontroles</button>
+            <div class="collapsible-content">
+                <div class="step">
+                    <span class="step-number">31</span>
+                    Blokkeer declaraties die nog niet door Evean zijn goedgekeurd.
+                </div>
+                <div class="step">
+                    <span class="step-number">32</span>
+                    Pas alleen na goedkeuring de status aan, anders klopt de factuur niet.
+                </div>
+                <div class="step">
+                    <span class="step-number">33</span>
+                    Bij onterechte goedkeuring (bij ziekte):
+                    <ul>
+                        <li>Maak een nieuwe batch met negatieve uren (min-uren)</li>
+                        <li>Zet kolom Totaal op <strong>Getal</strong> met min-getal (rode tekst)</li>
+                        <li>Voeg uitleg toe: "8 uur goedgekeurd in batch 1, medewerker bleek ziek → –8 uur"</li>
+                        <li>Mail opnieuw naar Ron en Nico met deze toelichting</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section id="dagelijks" class="section">
+            <h2>3. Dagelijks Tijdschema en Mailtaken</h2>
+            
+            <h3>Maandag Schema</h3>
+            <div class="step">
+                <strong>09:00–10:00</strong> – Controleer <strong>Concept plaatsingen</strong> voor nieuwe diensten.
+            </div>
+            <div class="step">
+                <strong>10:00–11:00</strong> – Mailbox Admin:
+                <ul>
+                    <li>Vlag mails over kilometers en vrije uren</li>
+                    <li>Verplaats naar juiste weekmap</li>
+                </ul>
+            </div>
+            <div class="step">
+                <strong>11:00–11:15</strong> – Urenverwerking Evean versturen aan Ron & Nico (volg §2).
+            </div>
+            <div class="step">
+                <strong>11:30–12:00</strong> – Disputen afhandelen in de Admin-mailbox.
+            </div>
+            <div class="step">
+                <strong>12:00–12:15</strong> – Controle Concept plaatsingen.
+            </div>
+            <div class="step">
+                <strong>12:15–12:45</strong> – Mailbox bijwerken.
+            </div>
+            <div class="step">
+                <strong>13:30–14:00</strong> – Afwijkende declaraties nalopen:
+                <ul>
+                    <li>Verwijder onterechte reiskosten</li>
+                    <li>Blokkeer diensten van 1 minuut of 24 uur</li>
+                </ul>
+            </div>
+            <div class="step">
+                <strong>14:00–14:30</strong> – Mailbox bijwerken.
+            </div>
+            <div class="step">
+                <strong>14:30–14:45</strong> – Uren Stichting Santé Partners controleren en mailen naar zorgadministratie@santepartners.nl.
+            </div>
+            <div class="step">
+                <strong>14:45–15:00</strong> – Uren Stichting Bartimeus mailen naar flexbureau@bartimeus.nl.
+            </div>
+            <div class="step">
+                <strong>15:00–15:15</strong> – Uren SZR mailen naar flexpool@szr.nl.
+            </div>
+            <div class="step">
+                <strong>15:15–15:45</strong> – Afgekeurde diensten Evean mailen naar FW's en blokkeren.
+            </div>
+            <div class="step">
+                <strong>15:45–16:00</strong> – Uren Stichting Innoforte per locatie mailen (zie bestand).
+            </div>
+            <div class="step">
+                <strong>16:00–16:15</strong> – Disputen afhandelen.
+            </div>
+            <div class="step">
+                <strong>16:30–17:30</strong> – Mailbox bijhouden.
+            </div>
+            
+            <div class="warning">
+                <strong>Let op:</strong> Details voor Dinsdag t/m Donderdag volgen hetzelfde patroon. Zorg dat je alle taken op tijd uitvoert en de juiste volgorde aanhoudt.
+            </div>
+        </section>
+        <section id="quiz" class="section">
+            <h2>Kennistoets HappyOne</h2>
+            <p>Test je kennis met deze 20 vragen over de werkinstructies.</p>
+            
+            <div id="quiz-container">
+                <div class="quiz-progress">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progress-fill"></div>
+                    </div>
+                    <span id="progress-text">Vraag 1 van 20</span>
+                </div>
+                <div id="quiz-content">
+                    <!-- Questions will be inserted here by JavaScript -->
+                </div>
+                <div class="quiz-controls">
+                    <button id="prev-btn" onclick="previousQuestion()" disabled>Vorige</button>
+                    <button id="next-btn" onclick="nextQuestion()">Volgende</button>
+                    <button id="submit-btn" onclick="submitQuiz()" style="display: none;">Verzenden</button>
+                </div>
+            </div>
+            <div id="quiz-results" style="display: none;">
+                <h3>Je resultaten</h3>
+                <div class="results-score">
+                    <div class="score-circle">
+                        <span id="score-percentage">0%</span>
+                    </div>
+                    <p id="score-text">Je hebt 0 van de 20 vragen goed beantwoord.</p>
+                </div>
+                <div id="results-details"></div>
+                <button onclick="resetQuiz()" class="reset-btn">Opnieuw proberen</button>
+            </div>
+        </section>
+    </div>
+    <script>
+        // Quiz questions
+        const questions = [
+            {
+                question: "Wat is het allereerste wat je doet als je begint met declaraties klaarzetten?",
+                options: ["Declaraties selecteren", "HappyOne openen en inloggen", "Status controleren", "Vestigingen kiezen"],
+                correct: 1
+            },
+            {
+                question: "Welke vestigingen selecteer je bij Vestiging Klant?",
+                options: [
+                    "Alleen Amsterdam en Groningen",
+                    "Amsterdam, Amersfoort, Groningen, HappyNurse Nederland, HappyNurse Service Center, Leiden, Den Bosch",
+                    "Alle beschikbare vestigingen",
+                    "Alleen HappyNurse vestigingen"
+                ],
+                correct: 1
+            },
+            {
+                question: "Welke status kies je om alleen nieuwe declaraties te zien?",
+                options: ["Klant Validatie", "Overzetten naar EF", "Nieuw", "Goedgekeurd"],
+                correct: 2
+            },
+            {
+                question: "Hoe dien je declaraties in namens FW?",
+                options: [
+                    "Vink alle regels aan, klik op Actie, kies Indienen namens FW",
+                    "Klik direct op Indienen",
+                    "Selecteer één regel en klik Verzenden",
+                    "Ga naar Status en kies FW"
+                ],
+                correct: 0
+            },
+            {
+                question: "Wat doe je nadat je de filter Klant Validatie hebt aangezet?",
+                options: [
+                    "Wacht op automatische synchronisatie",
+                    "Vink opnieuw alle regels aan",
+                    "Sluit HappyOne af",
+                    "Exporteer de gegevens"
+                ],
+                correct: 1
+            },
+            {
+                question: "Waarom moet je de status niet zelf op 'Synchroniseren' zetten?",
+                options: [
+                    "Het systeem crashed",
+                    "Dit veroorzaakt dubbele declaraties",
+                    "De synchronisatie stopt",
+                    "Het is niet toegestaan"
+                ],
+                correct: 1
+            },
+            {
+                question: "Naar welke status ga je voor handmatige synchronisatie?",
+                options: ["Synchroniseren", "Klant Akkoord", "Overzetten naar EF", "Nieuw"],
+                correct: 2
+            },
+            {
+                question: "Noem twee kolommen die je verwijdert uit het Evean-exportbestand.",
+                options: [
+                    "A en B",
+                    "Medewerker Function (C) en Medewerker Overeenkomst (D)",
+                    "Datum en Tijd",
+                    "Naam en Adres"
+                ],
+                correct: 1
+            },
+            {
+                question: "Hoe noem je het bestand met alle uren voor Evean? Geef het formaat.",
+                options: [
+                    "Evean_uren.xlsx",
+                    "<datum> Evean export",
+                    "<jaartal>-<weeknummer> Evean alle uren",
+                    "Uren_Evean_<week>"
+                ],
+                correct: 2
+            },
+            {
+                question: "Wat doe je met regels van 0,02 uur in het Excel-bestand?",
+                options: ["Markeer ze geel", "Verwijder ze", "Laat ze staan", "Rond ze af naar 1 uur"],
+                correct: 1
+            },
+            {
+                question: "Hoe stuur je de UZK- en ZZP-bestanden naar Evean?",
+                options: [
+                    "In aparte e-mails",
+                    "Via een upload portal",
+                    "In één e-mail met beide bestanden als bijlagen",
+                    "Per post"
+                ],
+                correct: 2
+            },
+            {
+                question: "Welke twee e-mailadressen gebruik je voor Evean-uren?",
+                options: [
+                    "info@evean.nl en admin@evean.nl",
+                    "rbreidenbach@evean.nl en nbruin@evean.nl",
+                    "uren@evean.nl en declaraties@evean.nl",
+                    "happynurse@evean.nl en flexbureau@evean.nl"
+                ],
+                correct: 1
+            },
+            {
+                question: "Waarop filter je om afgekeurde diensten te vinden in het teruggestuurde bestand?",
+                options: ["AFGEKEURD", "FOUT", "NIET AKKOORD", "REJECTED"],
+                correct: 2
+            },
+            {
+                question: "Welke kolom vervang je door ONS in het afgekeurde diensten-bestand?",
+                options: ["Kolom A", "Kolom1", "Kolom P", "Kolom Z"],
+                correct: 1
+            },
+            {
+                question: "Wat moet je doen als een medewerker geen reden heeft gegeven voor een afwijking?",
+                options: [
+                    "Negeer het",
+                    "Bel de medewerker direct",
+                    "Mail alle info naar evean@happynurse.nl en vraag hen contact op te nemen met het Flexbureau",
+                    "Keur de uren goed"
+                ],
+                correct: 2
+            },
+            {
+                question: "Wanneer stuur je medewerkers een herinnering voor afgekeurde diensten?",
+                options: ["Vrijdagmiddag", "Maandagochtend", "Maandagmiddag", "Dinsdagochtend"],
+                correct: 2
+            },
+            {
+                question: "Welke status blokkeer je tot Evean de uren goedkeurt?",
+                options: [
+                    "Alle declaraties die nog niet door Evean zijn goedgekeurd",
+                    "Alleen nieuwe declaraties",
+                    "Geen enkele status",
+                    "Alleen afgekeurde declaraties"
+                ],
+                correct: 0
+            },
+            {
+                question: "Hoe behandel je onterecht goedgekeurde uren vanwege ziekte?",
+                options: [
+                    "Verwijder de declaratie",
+                    "Maak een nieuwe batch met negatieve uren (min-uren)",
+                    "Negeer het probleem",
+                    "Stuur een klacht naar HR"
+                ],
+                correct: 1
+            },
+            {
+                question: "Wat is het belangrijkste doel van het dagelijkse tijdschema?",
+                options: [
+                    "Pauzes plannen",
+                    "Ervoor zorgen dat alle taken op tijd worden uitgevoerd in de juiste volgorde",
+                    "Overuren registreren",
+                    "Meetings plannen"
+                ],
+                correct: 1
+            },
+            {
+                question: "Welke mailbox gebruik je voor het verwerken van disputen?",
+                options: ["Persoonlijke mailbox", "Info mailbox", "Admin-mailbox", "Disputen mailbox"],
+                correct: 2
+            }
+        ];
+        let currentQuestion = 0;
+        let userAnswers = [];
+        // Navigation
+        function showSection(sectionId) {
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.remove('active');
+            });
+            document.getElementById(sectionId).classList.add('active');
+            document.querySelectorAll('nav button').forEach(button => {
+                button.classList.remove('active');
+            });
+            event.target.classList.add('active');
+        }
+        // Collapsible functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const collapsibles = document.querySelectorAll('.collapsible');
+            collapsibles.forEach(button => {
+                button.addEventListener('click', function() {
+                    this.classList.toggle('active');
+                    const content = this.nextElementSibling;
+                    if (content.style.maxHeight) {
+                        content.style.maxHeight = null;
+                    } else {
+                        content.style.maxHeight = content.scrollHeight + "px";
+                    }
+                });
+            });
+            // Initialize quiz
+            displayQuestion();
+        });
+        // Quiz functions
+        function displayQuestion() {
+            const quizContent = document.getElementById('quiz-content');
+            const question = questions[currentQuestion];
+            
+            quizContent.innerHTML = `
+                <div class="quiz-question">
+                    <h3>Vraag ${currentQuestion + 1}</h3>
+                    <p>${question.question}</p>
+                    <div class="quiz-options">
+                        ${question.options.map((option, index) => `
+                            <div class="quiz-option" onclick="selectOption(${index})" data-option="${index}">
+                                ${option}
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+            
+            // Update progress
+            updateProgress();
+            
+            // Update navigation buttons
+            updateNavigation();
+            
+            // Restore previous answer if exists
+            if (userAnswers[currentQuestion] !== undefined) {
+                selectOption(userAnswers[currentQuestion]);
+            }
+        }
+        
+        function selectOption(optionIndex) {
+            // Remove previous selection
+            document.querySelectorAll('.quiz-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+            
+            // Add selection to clicked option
+            document.querySelector(`[data-option="${optionIndex}"]`).classList.add('selected');
+            
+            // Store answer
+            userAnswers[currentQuestion] = optionIndex;
+            
+            // Update navigation
+            updateNavigation();
+        }
+        
+        function updateProgress() {
+            const progressFill = document.getElementById('progress-fill');
+            const progressText = document.getElementById('progress-text');
+            
+            const percentage = ((currentQuestion + 1) / questions.length) * 100;
+            progressFill.style.width = percentage + '%';
+            progressText.textContent = `Vraag ${currentQuestion + 1} van ${questions.length}`;
+        }
+        
+        function updateNavigation() {
+            const prevBtn = document.getElementById('prev-btn');
+            const nextBtn = document.getElementById('next-btn');
+            const submitBtn = document.getElementById('submit-btn');
+            
+            // Previous button
+            prevBtn.disabled = currentQuestion === 0;
+            
+            // Next/Submit button
+            if (currentQuestion === questions.length - 1) {
+                nextBtn.style.display = 'none';
+                submitBtn.style.display = 'block';
+            } else {
+                nextBtn.style.display = 'block';
+                submitBtn.style.display = 'none';
+            }
+        }
+        
+        function nextQuestion() {
+            if (currentQuestion < questions.length - 1) {
+                currentQuestion++;
+                displayQuestion();
+            }
+        }
+        
+        function previousQuestion() {
+            if (currentQuestion > 0) {
+                currentQuestion--;
+                displayQuestion();
+            }
+        }
+        
+        function submitQuiz() {
+            // Calculate score
+            let correctAnswers = 0;
+            for (let i = 0; i < questions.length; i++) {
+                if (userAnswers[i] === questions[i].correct) {
+                    correctAnswers++;
+                }
+            }
+            
+            const percentage = Math.round((correctAnswers / questions.length) * 100);
+            
+            // Show results
+            document.getElementById('quiz-container').style.display = 'none';
+            document.getElementById('quiz-results').style.display = 'block';
+            
+            // Update score display
+            document.getElementById('score-percentage').textContent = percentage + '%';
+            document.getElementById('score-text').textContent = 
+                `Je hebt ${correctAnswers} van de ${questions.length} vragen goed beantwoord.`;
+            
+            // Show detailed results
+            showDetailedResults(correctAnswers);
+        }
+        
+        function showDetailedResults(correctAnswers) {
+            const resultsDetails = document.getElementById('results-details');
+            let detailsHTML = '<h4>Gedetailleerde resultaten:</h4>';
+            
+            for (let i = 0; i < questions.length; i++) {
+                const isCorrect = userAnswers[i] === questions[i].correct;
+                const resultClass = isCorrect ? 'result-correct' : 'result-incorrect';
+                const resultIcon = isCorrect ? '✓' : '✗';
+                
+                detailsHTML += `
+                    <div class="result-item">
+                        <span class="${resultClass}">${resultIcon} Vraag ${i + 1}</span>: ${questions[i].question}<br>
+                        <small>Jouw antwoord: ${questions[i].options[userAnswers[i]] || 'Niet beantwoord'}</small><br>
+                        ${!isCorrect ? `<small>Correct antwoord: ${questions[i].options[questions[i].correct]}</small>` : ''}
+                    </div>
+                `;
+            }
+            
+            resultsDetails.innerHTML = detailsHTML;
+        }
+        
+        function resetQuiz() {
+            currentQuestion = 0;
+            userAnswers = [];
+            document.getElementById('quiz-container').style.display = 'block';
+            document.getElementById('quiz-results').style.display = 'none';
+            displayQuestion();
+        }
+    </script>
+</body>
+</html>
