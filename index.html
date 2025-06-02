@@ -1758,7 +1758,12 @@
             performEnhancedSearch(term);
         }
 
+        // Store last search results globally for goToResult function
+        let lastSearchResults = [];
+        
         function displaySearchResults(results, query) {
+            // Store results for later use
+            lastSearchResults = results;
             if (results.length === 0) {
                 // Toon slimme suggesties bij geen resultaten
                 const suggestions = getSmartSuggestions(query);
@@ -1848,14 +1853,172 @@
             // Scroll to the element after a short delay
             setTimeout(() => {
                 const query = searchBox.value.trim();
+                
+                // Get the specific search result that was clicked
+                const searchResult = lastSearchResults[resultIndex];
+                
+                // Find the target element and open its specific collapsible
+                const targetElement = findAndOpenSpecificCollapsible(sectionId, searchResult);
+                
                 highlightInPage(query);
                 
-                // Find and scroll to the first highlighted element
-                const firstHighlight = document.querySelector('.highlight');
-                if (firstHighlight) {
-                    firstHighlight.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                // Scroll to the target element or first highlight
+                const scrollTarget = targetElement || document.querySelector('.highlight');
+                if (scrollTarget) {
+                    scrollTarget.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    
+                    // Add special highlighting for 10 seconds
+                    addTemporaryHighlight(scrollTarget);
                 }
             }, 300);
+        }
+
+        // Find target element and open specific collapsible based on search result
+        function findAndOpenSpecificCollapsible(sectionId, searchResult) {
+            const section = document.getElementById(sectionId);
+            if (!section || !searchResult) {
+                console.log('No section or search result found:', sectionId, searchResult);
+                return null;
+            }
+            
+            console.log('Finding collapsible for:', searchResult);
+            let targetElement = null;
+            
+            // If the search result has a specific step number, find that step
+            if (searchResult.stepNumber) {
+                const stepNumber = parseInt(searchResult.stepNumber); // Convert to number
+                console.log('Looking for step number:', stepNumber);
+                
+                // Look for collapsible headers that contain this step number
+                const collapsibles = section.querySelectorAll('.collapsible');
+                console.log('Found collapsibles:', collapsibles.length);
+                
+                collapsibles.forEach((collapsible, index) => {
+                    const headerText = collapsible.textContent;
+                    console.log(`Checking collapsible ${index}: "${headerText}"`);
+                    
+                    // Check if this collapsible header contains the step number
+                    const stepMatch = headerText.match(/stap\s*(\d+)/i);
+                    if (stepMatch) {
+                        const foundStep = parseInt(stepMatch[1]);
+                        console.log(`Found step in header: ${foundStep}, looking for: ${stepNumber}`);
+                        if (foundStep === stepNumber) {
+                            console.log('Match found! Opening collapsible');
+                            // Open this specific collapsible
+                            if (!collapsible.classList.contains('active')) {
+                                collapsible.click();
+                            }
+                            targetElement = collapsible;
+                            return;
+                        }
+                    }
+                });
+                
+                // If not found in collapsible headers, look in content
+                if (!targetElement) {
+                    console.log('Not found in headers, checking content...');
+                    collapsibles.forEach(collapsible => {
+                        const content = collapsible.nextElementSibling;
+                        if (content && content.classList.contains('collapsible-content')) {
+                            const steps = content.querySelectorAll('.step');
+                            steps.forEach(step => {
+                                const stepNumberElement = step.querySelector('.step-number');
+                                if (stepNumberElement) {
+                                    const foundStepNumber = parseInt(stepNumberElement.textContent);
+                                    console.log(`Checking step content: ${foundStepNumber} vs ${stepNumber}`);
+                                    if (foundStepNumber === stepNumber) {
+                                        console.log('Match found in content! Opening collapsible');
+                                        // Open this collapsible
+                                        if (!collapsible.classList.contains('active')) {
+                                            collapsible.click();
+                                        }
+                                        targetElement = step;
+                                    }
+                                }
+                            });
+                        }
+                    });
+                }
+            } else {
+                console.log('No step number, using fallback logic');
+                // Fallback to original logic for non-step results
+                const query = searchResult.matchedTerm || searchBox.value.trim();
+                const queryLower = query.toLowerCase();
+                
+                const collapsibles = section.querySelectorAll('.collapsible');
+                collapsibles.forEach(collapsible => {
+                    const content = collapsible.nextElementSibling;
+                    if (content && content.classList.contains('collapsible-content')) {
+                        const contentText = content.textContent.toLowerCase();
+                        const headerText = collapsible.textContent.toLowerCase();
+                        
+                        if (contentText.includes(queryLower) || headerText.includes(queryLower)) {
+                            if (!collapsible.classList.contains('active')) {
+                                collapsible.click();
+                            }
+                            if (!targetElement) {
+                                targetElement = collapsible;
+                            }
+                        }
+                    }
+                });
+            }
+            
+            console.log('Target element found:', targetElement);
+            return targetElement;
+        }
+
+        // Add temporary highlight effect for 10 seconds
+        function addTemporaryHighlight(element) {
+            // Create a temporary highlight overlay
+            const overlay = document.createElement('div');
+            overlay.style.cssText = `
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(37, 99, 235, 0.1);
+                border: 3px solid #2563eb;
+                border-radius: 8px;
+                pointer-events: none;
+                z-index: 1000;
+                animation: pulseHighlight 2s infinite;
+            `;
+            
+            // Add pulse animation if not exists
+            if (!document.querySelector('#pulse-animation-style')) {
+                const style = document.createElement('style');
+                style.id = 'pulse-animation-style';
+                style.textContent = `
+                    @keyframes pulseHighlight {
+                        0% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.4); }
+                        70% { box-shadow: 0 0 0 10px rgba(37, 99, 235, 0); }
+                        100% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0); }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+            
+            // Make element position relative if it's not already positioned
+            const originalPosition = element.style.position;
+            if (!originalPosition || originalPosition === 'static') {
+                element.style.position = 'relative';
+            }
+            
+            // Add overlay to element
+            element.appendChild(overlay);
+            
+            // Remove highlight after 10 seconds
+            setTimeout(() => {
+                if (overlay.parentNode) {
+                    overlay.parentNode.removeChild(overlay);
+                }
+                // Restore original position if we changed it
+                if (!originalPosition || originalPosition === 'static') {
+                    element.style.position = originalPosition || '';
+                }
+            }, 10000);
         }
 
         function highlightInPage(query) {
